@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigquery"
-	"github.com/aktsk/appengine-access-log-analyzer/internal/aaquery"
+	"github.com/aktsk/aealanlys/internal/aaquery"
 	"google.golang.org/api/iterator"
 )
 
