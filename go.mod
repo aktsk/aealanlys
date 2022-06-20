@@ -1,4 +1,4 @@
-module github.com/aktsk/appengine-access-log-analyzer
+module github.com/aktsk/aealanlys
 
 require (
 	cloud.google.com/go/bigquery v1.22.0
