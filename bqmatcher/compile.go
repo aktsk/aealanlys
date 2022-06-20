@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unsafe"
 
-	aealanlys "github.com/aktsk/appengine-access-log-analyzer"
+	"github.com/aktsk/aealanlys"
 	"github.com/gorilla/mux"
 )
 
