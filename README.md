@@ -6,10 +6,3 @@ BigQuery に sink されているアクセスログを用いてルート毎の�
 BQ上でルート毎にアクセスログをまとめるには RegExp を用いています。[bqmatcher](./bqmatcher) を参照してください。
 
 詳細はクエリ ([internal/aaquery/template.go](./internal/aaquery/template.go)) を参照するとわかりやすいです。
-
-## TODO
-- 複数のテーブルを指定することができず、主に1日単位でしかログを集計できません
-    + デフォルトの sink 設定ではテーブル1つは1日のデータを意味します
-    + 必要であればワイルドカードテーブルを使用し `_TABLE_SUFFIX` を用いて絞るようにしてください
-- テーブルより小さい時間範囲でログを集計することができません
-- GAE App の Version でログを絞ることができません

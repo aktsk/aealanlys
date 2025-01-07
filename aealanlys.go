@@ -25,11 +25,11 @@ type PlanResult struct {
 	TotalBytesProcessed int64
 }
 
-func constructBQQuery(table string, pathGroupBy PathGrouping) (string, error) {
+func constructBQQuery(table, whereExp string, pathGroupBy PathGrouping) (string, error) {
 	funcname := "PTN"
 	bqq := pathGroupBy.PathToGroupingKeyBQUDF(funcname)
 	{
-		body, err := aaquery.Generate(funcname, table)
+		body, err := aaquery.Generate(funcname, table, whereExp)
 		if err != nil {
 			return "", err
 		}
@@ -39,8 +39,8 @@ func constructBQQuery(table string, pathGroupBy PathGrouping) (string, error) {
 }
 
 // AnalyzeDryrun BQに問い合わせを行い実行計画を返却する
-func AnalyzeDryrun(ctx context.Context, client *bigquery.Client, table string, pathGroupBy PathGrouping) (*bigquery.JobStatistics, error) {
-	q, err := constructBQQuery(table, pathGroupBy)
+func AnalyzeDryrun(ctx context.Context, client *bigquery.Client, table, whereExp string, pathGroupBy PathGrouping) (*bigquery.JobStatistics, error) {
+	q, err := constructBQQuery(table, whereExp, pathGroupBy)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct query: %w", err)
 	}
@@ -91,8 +91,8 @@ func readRow(schema bigquery.Schema, values []bigquery.Value) ([]string, error) 
 }
 
 // Analyze BQに問い合わせを行い appengine のログを解析した結果を CSV として writer に書く
-func Analyze(ctx context.Context, client *bigquery.Client, table string, pathGroupBy PathGrouping, csvw io.Writer) error {
-	q, err := constructBQQuery(table, pathGroupBy)
+func Analyze(ctx context.Context, client *bigquery.Client, table, whereExp string, pathGroupBy PathGrouping, csvw io.Writer) error {
+	q, err := constructBQQuery(table, whereExp, pathGroupBy)
 	if err != nil {
 		return fmt.Errorf("failed to construct query: %w", err)
 	}

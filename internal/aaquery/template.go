@@ -14,7 +14,8 @@ SELECT
 	COUNT(protoPayload.status) AS count,
 	COUNTIF(protoPayload.status < 300) AS count_2xx,
 	COUNTIF(299 < protoPayload.status AND protoPayload.status < 400) AS count_3xx,
-	COUNTIF(399 < protoPayload.status) AS count_failure,
+	COUNTIF(399 < protoPayload.status AND protoPayload.status < 500) AS count_4xx,
+	COUNTIF(499 < protoPayload.status) AS count_5xx,
 	FMT_LATE(MIN(protoPayload.latency)) AS late0pctl,
 	FMT_LATE(APPROX_QUANTILES(protoPayload.latency, 100)[OFFSET(50)]) AS late50pctl,
 	FMT_LATE(APPROX_QUANTILES(protoPayload.latency, 100)[OFFSET(95)]) AS late95pctl,
@@ -22,7 +23,9 @@ SELECT
 	FMT_LATE(MAX(protoPayload.latency)) AS late100pctl,
 	MIN(timestamp) AS min_ts,
 	MAX(timestamp) AS max_ts,
-FROM `+"`"+`{{.Table}}`+"`"+`
+FROM `+"`"+`{{.Table}}`+"`"+`{{if gt (len .WhereExp) 0}}
+WHERE {{.WhereExp}}
+{{- end}}
 GROUP BY
 	methodName
 ORDER BY
@@ -32,17 +35,19 @@ ORDER BY
 type templateParameter struct {
 	Table        string
 	GroupingFunc string
+	WhereExp     string
 }
 
 // Generate テンプレートからクエリを生成する
 //
 // 使用する groupingFunc は aealanlys.PathGrouping.ToPathToGroupingKeyBQUDF のインターフェースを想定している。
 // TODO: ログを sink する際に logName による絞り込みをしているかどうかを受けつけ、必要なら WHERE を追加するようにする
-func Generate(groupingFuncName, table string) (string, error) {
+func Generate(groupingFuncName, table, whereExp string) (string, error) {
 	var b bytes.Buffer
 	if err := tpl.Execute(&b, templateParameter{
 		Table:        table,
 		GroupingFunc: groupingFuncName,
+		WhereExp:     whereExp,
 	}); err != nil {
 		return "", err
 	}
